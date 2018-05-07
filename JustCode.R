@@ -78,8 +78,92 @@ GROUP BY CROPDMG")
 
 ##TODO: this will be the case statement to handle the unique values of StormData-----
 
-StormData_w_ColumnforFullNumericCost <- sqldf::sqldf("SELECT *, '1' as new_Column
-                                                     FROM StormData")
+# Key to define the EXP values:
+#
+# (+) = 1
+#
+# numeric 0..8 = 10
+#
+# H,h = hundreds = 100
+# 
+# K,k = kilos = thousands = 1,000
+# 
+# M,m = millions = 1,000,000
+# 
+# B,b = billions = 1,000,000,000
+# 
+# (-) = 0
+# 
+# (?) = 0
+# 
+# black/empty character = 0
+# 
+
+StormData_w_ColumnforFullNumericCost <- sqldf::sqldf("SELECT *, 
+CASE 
+WHEN CROPDMGEXP = '+' THEN 1 
+WHEN CROPDMGEXP = '0' THEN 10 
+WHEN CROPDMGEXP = '1' THEN 10 
+WHEN CROPDMGEXP = '2' THEN 10 
+WHEN CROPDMGEXP = '3' THEN 10 
+WHEN CROPDMGEXP = '4' THEN 10 
+WHEN CROPDMGEXP = '5' THEN 10 
+WHEN CROPDMGEXP = '6' THEN 10 
+WHEN CROPDMGEXP = '7' THEN 10 
+WHEN CROPDMGEXP = '8' THEN 10 
+WHEN CROPDMGEXP = '9' THEN 10 
+WHEN CROPDMGEXP = 'H' THEN 100 
+WHEN CROPDMGEXP = 'h' THEN 100 
+WHEN CROPDMGEXP = 'K' THEN 1000 
+WHEN CROPDMGEXP = 'k' THEN 1000 
+WHEN CROPDMGEXP = 'M' THEN 1000000 
+WHEN CROPDMGEXP = 'm' THEN 1000000 
+WHEN CROPDMGEXP = 'B' THEN 1000000000 
+WHEN CROPDMGEXP = 'b' THEN 1000000000 
+ELSE 0
+END CROP_MULT, 
+CASE 
+WHEN PROPDMGEXP = '+' THEN 1 
+WHEN PROPDMGEXP = '0' THEN 10 
+WHEN PROPDMGEXP = '1' THEN 10 
+WHEN PROPDMGEXP = '2' THEN 10 
+WHEN PROPDMGEXP = '3' THEN 10 
+WHEN PROPDMGEXP = '4' THEN 10 
+WHEN PROPDMGEXP = '5' THEN 10 
+WHEN PROPDMGEXP = '6' THEN 10 
+WHEN PROPDMGEXP = '7' THEN 10 
+WHEN PROPDMGEXP = '8' THEN 10 
+WHEN PROPDMGEXP = '9' THEN 10 
+WHEN PROPDMGEXP = 'H' THEN 100 
+WHEN PROPDMGEXP = 'h' THEN 100 
+WHEN PROPDMGEXP = 'K' THEN 1000 
+WHEN PROPDMGEXP = 'k' THEN 1000 
+WHEN PROPDMGEXP = 'M' THEN 1000000 
+WHEN PROPDMGEXP = 'm' THEN 1000000 
+WHEN PROPDMGEXP = 'B' THEN 1000000000 
+WHEN PROPDMGEXP = 'b' THEN 1000000000 
+ELSE 0
+END PROP_MULT
+FROM StormData")
+
+StormData_w_ColumnforFullNumericCost_r2 <- sqldf::sqldf("SELECT *,
+(CROP_MULT * CROPDMG) AS CROPDMG_COST,
+(PROP_MULT * PROPDMG) AS PROPDMG_COST 
+FROM StormData_w_ColumnforFullNumericCost")
+
+###Exploratory statements
+# ##find unique values of PROPDMGEXP and COST--------------------------
+# PROPDMGEXP_COUNTuniqueElements_r2 <- sqldf::sqldf("SELECT PROPDMGEXP, COUNT(PROPDMGEXP), SUM(PROPDMG_COST)  
+#                                                FROM StormData_w_ColumnforFullNumericCost_r2
+#                                                GROUP BY PROPDMGEXP")
+# 
+# 
+# 
+# ##find unique values of CROPDMGEXP and COST--------------------------------
+# CROPDMGEXP_COUNTuniqueElements_r2 <- sqldf::sqldf(
+#   "SELECT CROPDMGEXP, COUNT(CROPDMGEXP), SUM(CROPDMG_COST) 
+#   FROM StormData_w_ColumnforFullNumericCost_r2
+#   GROUP BY CROPDMGEXP")
 
 ##Exploratory statement: Get non-blank REMARKS------------------------------------
 #20180502 1325 At this time it would appear that the remarks
