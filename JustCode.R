@@ -146,10 +146,44 @@ ELSE 0
 END PROP_MULT
 FROM StormData")
 
-StormData_w_ColumnforFullNumericCost_r2 <- sqldf::sqldf("SELECT *,
+StormData_w_ColumnforFullNumericCost_r2 <- sqldf::sqldf( 
+"SELECT *,
 (CROP_MULT * CROPDMG) AS CROPDMG_COST,
 (PROP_MULT * PROPDMG) AS PROPDMG_COST 
-FROM StormData_w_ColumnforFullNumericCost")
+FROM StormData_w_ColumnforFullNumericCost" 
+)
+
+#Prep all for plotting
+
+StormData_w_Cost_PerEventType_CropDamage <- sqldf::sqldf(
+  "SELECT EVTYPE, SUM(CROPDMG_COST) as SUM_OF_CROP_DAMAGE
+  FROM StormData_w_ColumnforFullNumericCost_r2
+  WHERE CROPDMG_COST > 0 
+  GROUP BY EVTYPE 
+  ORDER BY SUM(CROPDMG_COST) DESC
+  LIMIT 10"
+)
+
+StormData_w_Cost_PerEventType_PropDamage <- sqldf::sqldf(
+  "SELECT EVTYPE, SUM(PROPDMG_COST) as SUM_OF_PROP_DAMAGE
+  FROM StormData_w_ColumnforFullNumericCost_r2
+  WHERE PROPDMG_COST > 0 
+  GROUP BY EVTYPE 
+  ORDER BY SUM(PROPDMG_COST) DESC
+  LIMIT 10"
+)
+
+StormData_PplDamage_TOP10 <- sqldf::sqldf(
+  "Select * FROM PplDMG_GroupedBy_EVTYPE LIMIT 10"
+)
+
+#plot data--------------------------------------------
+#20180511 1454 DWB -- Need to work on this as I need to 
+#ensure that the bar plot's y axis gets labeled properly
+#also need to get a more accurate x label.
+barplot(StormData_PplDamage_TOP10$`SUM(FatalAndInjuresCombined)`,
+        main="Storm Injuries and Fatalities", horiz=TRUE
+        )
 
 ###Exploratory statements
 # ##find unique values of PROPDMGEXP and COST--------------------------
