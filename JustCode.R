@@ -155,7 +155,7 @@ FROM StormData_w_ColumnforFullNumericCost"
 
 #Prep all for plotting
 
-StormData_w_Cost_PerEventType_CropDamage <- sqldf::sqldf(
+StormData_w_Cost_PerEventType_CropDamage_TOP10 <- sqldf::sqldf(
   "SELECT EVTYPE, SUM(CROPDMG_COST) as SUM_OF_CROP_DAMAGE
   FROM StormData_w_ColumnforFullNumericCost_r2
   WHERE CROPDMG_COST > 0 
@@ -164,7 +164,7 @@ StormData_w_Cost_PerEventType_CropDamage <- sqldf::sqldf(
   LIMIT 10"
 )
 
-StormData_w_Cost_PerEventType_PropDamage <- sqldf::sqldf(
+StormData_w_Cost_PerEventType_PropDamage_TOP10 <- sqldf::sqldf(
   "SELECT EVTYPE, SUM(PROPDMG_COST) as SUM_OF_PROP_DAMAGE
   FROM StormData_w_ColumnforFullNumericCost_r2
   WHERE PROPDMG_COST > 0 
@@ -181,25 +181,51 @@ StormData_PplDamage_TOP10 <- sqldf::sqldf(
 #20180511 1454 DWB -- Need to work on this as I need to 
 #ensure that the bar plot's y axis gets labeled properly
 #also need to get a more accurate x label.
+par(mai=c(1,2.1,1,1))
 barplot(StormData_PplDamage_TOP10$`SUM(FatalAndInjuresCombined)`,
-        main="Storm Injuries and Fatalities", horiz=TRUE
+        main="Top 10 sources of Human Weather Casuality by Weather Event Type", 
+        xlab = "Total Casualty Count",
+        names.arg = StormData_PplDamage_TOP10$EVTYPE,
+        horiz = TRUE, 
+        las=1
         )
+title(ylab = "Type of Weather Event", line=0, cex.lab=1, family="Calibri Light")
 
-###Exploratory statements
-# ##find unique values of PROPDMGEXP and COST--------------------------
+par(mai=c(1,2.1,1,1))
+barplot(StormData_w_Cost_PerEventType_CropDamage_TOP10$SUM_OF_CROP_DAMAGE,
+        main="Top 10 sources of Crop Damage by Weather Event Type", 
+        xlab = "Crop Damage in $",
+        names.arg = StormData_w_Cost_PerEventType_CropDamage_TOP10$EVTYPE,
+        horiz = TRUE,
+        las=1
+)
+title(ylab = "Type of Weather Event", line=0, cex.lab=1, family="Calibri Light")
+
+par(mai=c(1,2.1,1,1))
+barplot(StormData_w_Cost_PerEventType_PropDamage_TOP10$SUM_OF_PROP_DAMAGE,
+        main="Top 10 sources of Property Damage by Weather Event Type", 
+        xlab = "Property Damage in $", 
+        names.arg = StormData_w_Cost_PerEventType_PropDamage_TOP10$EVTYPE,
+        horiz = TRUE, 
+        las=1
+)
+title(ylab = "Type of Weather Event", line=0, cex.lab=1, family="Calibri Light")
+
+###Exploratory statements---------------
+# ##find unique values of PROPDMGEXP and COST
 # PROPDMGEXP_COUNTuniqueElements_r2 <- sqldf::sqldf("SELECT PROPDMGEXP, COUNT(PROPDMGEXP), SUM(PROPDMG_COST)  
 #                                                FROM StormData_w_ColumnforFullNumericCost_r2
 #                                                GROUP BY PROPDMGEXP")
 # 
 # 
 # 
-# ##find unique values of CROPDMGEXP and COST--------------------------------
+# ##find unique values of CROPDMGEXP and COST
 # CROPDMGEXP_COUNTuniqueElements_r2 <- sqldf::sqldf(
 #   "SELECT CROPDMGEXP, COUNT(CROPDMGEXP), SUM(CROPDMG_COST) 
 #   FROM StormData_w_ColumnforFullNumericCost_r2
 #   GROUP BY CROPDMGEXP")
 
-##Exploratory statement: Get non-blank REMARKS------------------------------------
+##Exploratory statement: Get non-blank REMARKS
 #20180502 1325 At this time it would appear that the remarks
 #field will not help identify the unique value exp
 #Maybe explore the dropping of these?
